@@ -51,13 +51,65 @@
         android:id="@+id/capturedImageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         android:background="@color/wood_dark"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/titleBar"
-        app:layout_constraintBottom_toTopOf="@id/controlBar"
+        app:layout_constraintBottom_toTopOf="@id/frameSelectorScroll"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 프레임 선택 가로 스크롤 (촬영 후에만 표시) -->
+    <HorizontalScrollView
+        android:id="@+id/frameSelectorScroll"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:background="@color/wood_dark"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/controlBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp">
+
+            <Button
+                android:id="@+id/frameNoneBtn"
+                style="@style/FrameChipButton"
+                android:text="없음" />
+
+            <Button
+                android:id="@+id/frameWoodBtn"
+                style="@style/FrameChipButton"
+                android:text="우드 테두리" />
+
+            <Button
+                android:id="@+id/framePolaroidBtn"
+                style="@style/FrameChipButton"
+                android:text="폴라로이드" />
+
+            <Button
+                android:id="@+id/frameHeartBtn"
+                style="@style/FrameChipButton"
+                android:text="하트" />
+
+            <Button
+                android:id="@+id/frameFilmBtn"
+                style="@style/FrameChipButton"
+                android:text="필름 스트립" />
+
+            <Button
+                android:id="@+id/frameStarBtn"
+                style="@style/FrameChipButton"
+                android:text="별빛" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <!-- 권한 안내 텍스트 -->
     <TextView
@@ -135,7 +187,7 @@
 
         </LinearLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- 만든 사람 표시 -->
     <TextView
