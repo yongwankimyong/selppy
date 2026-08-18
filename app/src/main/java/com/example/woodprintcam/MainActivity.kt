@@ -1,14 +1,14 @@
 package com.example.woodprintcam
 
-import android.graphics.Canvas
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
-import android.graphics.Paint
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
+import android.graphics.Paint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity() {
         capture.takePicture(
             cameraExecutor,
             object : ImageCapture.OnImageCapturedCallback() {
-                                override fun onCaptureSuccess(image: ImageProxy) {
+                override fun onCaptureSuccess(image: ImageProxy) {
                     val bitmap = applyBrightFilter(imageProxyToBitmap(image))
                     image.close()
                     runOnUiThread { showCapturedPhoto(bitmap) }
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-        // ImageProxy(YUV/JPEG) -> Bitmap 변환 + 회전 보정 + 전면 카메라 좌우 반전 보정
+    // ImageProxy(YUV/JPEG) -> Bitmap 변환 + 회전 보정 + 전면 카메라 좌우 반전 보정
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
         val buffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
@@ -169,6 +169,36 @@ class MainActivity : AppCompatActivity() {
         } else {
             bitmap
         }
+    }
+
+    // 밝고 화사한 느낌의 필터 (밝기 업 + 채도 업 + 살짝 선명하게)
+    private fun applyBrightFilter(source: Bitmap): Bitmap {
+        val result = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(result)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+        val brightness = 18f   // 밝기 (0~255 범위에서 더할 값)
+        val contrast = 1.08f   // 대비 (1.0이 원본)
+        val saturation = 1.35f // 채도 (1.0이 원본, 높을수록 화사함)
+
+        val saturationMatrix = ColorMatrix().apply { setSaturation(saturation) }
+        val brightnessContrastMatrix = ColorMatrix(
+            floatArrayOf(
+                contrast, 0f, 0f, 0f, brightness,
+                0f, contrast, 0f, 0f, brightness,
+                0f, 0f, contrast, 0f, brightness,
+                0f, 0f, 0f, 1f, 0f
+            )
+        )
+
+        val finalMatrix = ColorMatrix().apply {
+            postConcat(saturationMatrix)
+            postConcat(brightnessContrastMatrix)
+        }
+
+        paint.colorFilter = ColorMatrixColorFilter(finalMatrix)
+        canvas.drawBitmap(source, 0f, 0f, paint)
+        return result
     }
 
     private fun showCapturedPhoto(bitmap: Bitmap) {
