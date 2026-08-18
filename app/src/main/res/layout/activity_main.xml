@@ -111,6 +111,24 @@
         </LinearLayout>
     </HorizontalScrollView>
 
+    <!-- 카운트다운 숫자 표시 (3초 타이머용) -->
+    <TextView
+        android:id="@+id/countdownText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/wood_gold"
+        android:textSize="90sp"
+        android:textStyle="bold"
+        android:shadowColor="@color/wood_dark"
+        android:shadowRadius="12"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/previewView"
+        app:layout_constraintBottom_toBottomOf="@id/previewView"
+        app:layout_constraintStart_toStartOf="@id/previewView"
+        app:layout_constraintEnd_toEndOf="@id/previewView" />
+
     <!-- 권한 안내 텍스트 -->
     <TextView
         android:id="@+id/permissionText"
@@ -137,18 +155,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- 촬영 모드: 셔터 버튼 -->
-        <ImageButton
-            android:id="@+id/shutterButton"
-            android:layout_width="76dp"
-            android:layout_height="76dp"
-            android:background="@drawable/bg_shutter_button"
-            android:contentDescription="@string/capture_btn"
-            android:src="@android:color/transparent"
+        <!-- 촬영 모드: 바로찍기 / 3초 타이머 버튼 -->
+        <LinearLayout
+            android:id="@+id/captureButtonRow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <Button
+                android:id="@+id/instantCaptureButton"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/bg_gold_button"
+                android:text="@string/instant_capture_btn"
+                android:textColor="@color/wood_dark"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:paddingHorizontal="26dp" />
+
+            <Button
+                android:id="@+id/timerCaptureButton"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_outline_button"
+                android:text="@string/timer_capture_btn"
+                android:textColor="@color/wood_cream"
+                android:textAllCaps="false"
+                android:paddingHorizontal="26dp" />
+
+        </LinearLayout>
 
         <!-- 결과 확인 모드: 다시찍기 / 인쇄 버튼 -->
         <LinearLayout
