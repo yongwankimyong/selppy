@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
@@ -22,17 +23,23 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.print.PrintHelper
 import com.example.woodprintcam.databinding.ActivityMainBinding
-import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
+// 사용 가능한 프레임 종류
+enum class FrameType {
+    NONE, WOOD, POLAROID, HEART, FILMSTRIP, STARS
+}
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
-    private var lastCapturedBitmap: Bitmap? = null
+    private var lastCapturedBitmap: Bitmap? = null   // 프레임까지 적용된, 실제 인쇄될 이미지
+    private var originalBitmap: Bitmap? = null        // 프레임 적용 전 원본(필터만 적용된) 이미지
     private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var selectedFrame = FrameType.NONE
 
     // 카메라 권한 요청 런처.
     // 사용자가 한 번 "허용"을 누르면 안드로이드 시스템이 앱 재실행 시에도 계속 허용 상태를
@@ -68,6 +75,13 @@ class MainActivity : AppCompatActivity() {
         binding.retakeButton.setOnClickListener { returnToCameraMode() }
         binding.printButton.setOnClickListener { printCapturedPhoto() }
         binding.switchCameraButton.setOnClickListener { switchCamera() }
+
+        binding.frameNoneBtn.setOnClickListener { selectFrame(FrameType.NONE) }
+        binding.frameWoodBtn.setOnClickListener { selectFrame(FrameType.WOOD) }
+        binding.framePolaroidBtn.setOnClickListener { selectFrame(FrameType.POLAROID) }
+        binding.frameHeartBtn.setOnClickListener { selectFrame(FrameType.HEART) }
+        binding.frameFilmBtn.setOnClickListener { selectFrame(FrameType.FILMSTRIP) }
+        binding.frameStarBtn.setOnClickListener { selectFrame(FrameType.STARS) }
     }
 
     private fun hasCameraPermission(): Boolean =
@@ -202,20 +216,152 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showCapturedPhoto(bitmap: Bitmap) {
-        lastCapturedBitmap = bitmap
-        binding.capturedImageView.setImageBitmap(bitmap)
+        originalBitmap = bitmap
+        selectedFrame = FrameType.NONE
+        updateFramedPreview()
+
         binding.capturedImageView.visibility = android.view.View.VISIBLE
         binding.previewView.visibility = android.view.View.GONE
         binding.shutterButton.visibility = android.view.View.GONE
         binding.resultButtonRow.visibility = android.view.View.VISIBLE
+        binding.frameSelectorScroll.visibility = android.view.View.VISIBLE
     }
 
     private fun returnToCameraMode() {
         lastCapturedBitmap = null
+        originalBitmap = null
         binding.capturedImageView.visibility = android.view.View.GONE
         binding.previewView.visibility = android.view.View.VISIBLE
         binding.shutterButton.visibility = android.view.View.VISIBLE
         binding.resultButtonRow.visibility = android.view.View.GONE
+        binding.frameSelectorScroll.visibility = android.view.View.GONE
+    }
+
+    // 프레임 선택 시 호출 - 원본에 새로 선택한 프레임을 적용해서 미리보기 갱신
+    private fun selectFrame(frame: FrameType) {
+        selectedFrame = frame
+        updateFramedPreview()
+    }
+
+    private fun updateFramedPreview() {
+        val base = originalBitmap ?: return
+        val framed = applyFrame(base, selectedFrame)
+        lastCapturedBitmap = framed
+        binding.capturedImageView.setImageBitmap(framed)
+    }
+
+    // 프레임 종류에 따라 알맞은 함수로 분기
+    private fun applyFrame(source: Bitmap, frame: FrameType): Bitmap {
+        return when (frame) {
+            FrameType.NONE -> source
+            FrameType.WOOD -> drawBorderFrame(
+                source,
+                borderColor = ContextCompat.getColor(this, R.color.wood_medium),
+                borderWidthRatio = 0.05f,
+                cornerSymbol = null
+            )
+            FrameType.HEART -> drawBorderFrame(
+                source,
+                borderColor = ContextCompat.getColor(this, R.color.shutter_red),
+                borderWidthRatio = 0.018f,
+                cornerSymbol = "♥"
+            )
+            FrameType.STARS -> drawBorderFrame(
+                source,
+                borderColor = ContextCompat.getColor(this, R.color.wood_gold),
+                borderWidthRatio = 0.018f,
+                cornerSymbol = "★"
+            )
+            FrameType.FILMSTRIP -> drawFilmStripFrame(source)
+            FrameType.POLAROID -> drawPolaroidFrame(source)
+        }
+    }
+
+    // 단순 테두리 + (옵션) 네 모서리 장식 문자
+    private fun drawBorderFrame(
+        source: Bitmap,
+        borderColor: Int,
+        borderWidthRatio: Float,
+        cornerSymbol: String?
+    ): Bitmap {
+        val result = source.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(result)
+        val borderWidth = result.width * borderWidthRatio
+
+        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = borderColor
+            style = Paint.Style.STROKE
+            strokeWidth = borderWidth
+        }
+        val inset = borderWidth / 2f
+        canvas.drawRect(inset, inset, result.width - inset, result.height - inset, borderPaint)
+
+        if (cornerSymbol != null) {
+            val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = borderColor
+                textSize = result.width * 0.07f
+                textAlign = Paint.Align.CENTER
+            }
+            val margin = result.width * 0.07f
+            canvas.drawText(cornerSymbol, margin, margin, textPaint)
+            canvas.drawText(cornerSymbol, result.width - margin, margin, textPaint)
+            canvas.drawText(cornerSymbol, margin, result.height - margin / 2f, textPaint)
+            canvas.drawText(cornerSymbol, result.width - margin, result.height - margin / 2f, textPaint)
+        }
+        return result
+    }
+
+    // 필름 스트립: 위/아래 검은 띠 + 하얀 사각형 구멍 장식
+    private fun drawFilmStripFrame(source: Bitmap): Bitmap {
+        val barHeight = (source.height * 0.09f).toInt()
+        val result = Bitmap.createBitmap(source.width, source.height + barHeight * 2, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(result)
+        canvas.drawColor(Color.BLACK)
+        canvas.drawBitmap(source, 0f, barHeight.toFloat(), null)
+
+        val holePaint = Paint().apply { color = Color.WHITE }
+        val holeSize = barHeight * 0.5f
+        val holeSpacing = source.width / 10f
+        var x = holeSpacing / 2f
+        while (x < source.width) {
+            canvas.drawRect(x, barHeight * 0.25f, x + holeSize, barHeight * 0.75f, holePaint)
+            canvas.drawRect(
+                x,
+                result.height - barHeight * 0.75f,
+                x + holeSize,
+                result.height - barHeight * 0.25f,
+                holePaint
+            )
+            x += holeSpacing
+        }
+        return result
+    }
+
+    // 폴라로이드: 하얀 여백 + 하단 캡션 문구
+    private fun drawPolaroidFrame(source: Bitmap): Bitmap {
+        val margin = (source.width * 0.05f).toInt()
+        val bottomMargin = (source.height * 0.18f).toInt()
+        val result = Bitmap.createBitmap(
+            source.width + margin * 2,
+            source.height + margin + bottomMargin,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(result)
+        canvas.drawColor(Color.WHITE)
+        canvas.drawBitmap(source, margin.toFloat(), margin.toFloat(), null)
+
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.DKGRAY
+            textSize = bottomMargin * 0.4f
+            textAlign = Paint.Align.CENTER
+        }
+        canvas.drawText(
+            "♥ Family ♥",
+            result.width / 2f,
+            source.height + margin + bottomMargin * 0.6f,
+            textPaint
+        )
+        return result
     }
 
     // 안드로이드 표준 인쇄 프레임워크로 전달.
