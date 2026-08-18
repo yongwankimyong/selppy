@@ -356,7 +356,7 @@ class MainActivity : AppCompatActivity() {
             textAlign = Paint.Align.CENTER
         }
         canvas.drawText(
-            "♥ Family ♥",
+            "♥ 사랑해 ♥",
             result.width / 2f,
             source.height + margin + bottomMargin * 0.6f,
             textPaint
