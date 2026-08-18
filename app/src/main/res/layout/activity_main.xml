@@ -31,6 +31,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- 카메라 전환(전면/후면) 버튼 -->
+    <ImageButton
+        android:id="@+id/switchCameraButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_switch_camera_button"
+        android:src="@android:drawable/ic_menu_rotate"
+        android:contentDescription="카메라 전환"
+        android:scaleType="centerInside"
+        android:padding="10dp"
+        app:tint="@color/wood_cream"
+        app:layout_constraintTop_toTopOf="@id/previewView"
+        app:layout_constraintEnd_toEndOf="@id/previewView" />
+
     <!-- 촬영된 사진 미리보기 (촬영 후 표시) -->
     <ImageView
         android:id="@+id/capturedImageView"
