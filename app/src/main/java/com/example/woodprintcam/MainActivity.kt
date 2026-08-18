@@ -1,5 +1,9 @@
 package com.example.woodprintcam
 
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -123,8 +127,8 @@ class MainActivity : AppCompatActivity() {
         capture.takePicture(
             cameraExecutor,
             object : ImageCapture.OnImageCapturedCallback() {
-                override fun onCaptureSuccess(image: ImageProxy) {
-                    val bitmap = imageProxyToBitmap(image)
+                                override fun onCaptureSuccess(image: ImageProxy) {
+                    val bitmap = applyBrightFilter(imageProxyToBitmap(image))
                     image.close()
                     runOnUiThread { showCapturedPhoto(bitmap) }
                 }
