@@ -142,16 +142,25 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    // ImageProxy(YUV/JPEG) -> Bitmap 변환 + 회전 보정
+        // ImageProxy(YUV/JPEG) -> Bitmap 변환 + 회전 보정 + 전면 카메라 좌우 반전 보정
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
         val buffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
+        val matrix = Matrix()
         val rotationDegrees = image.imageInfo.rotationDegrees
-        return if (rotationDegrees != 0) {
-            val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+        if (rotationDegrees != 0) {
+            matrix.postRotate(rotationDegrees.toFloat())
+        }
+        // 전면 카메라는 화면에 거울처럼 보이므로, 저장되는 사진도
+        // 화면에서 본 것과 같게 좌우를 뒤집어줍니다.
+        if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+            matrix.postScale(-1f, 1f)
+        }
+
+        return if (!matrix.isIdentity) {
             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
         } else {
             bitmap
