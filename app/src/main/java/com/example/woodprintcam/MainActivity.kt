@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     private var lastCapturedBitmap: Bitmap? = null
+    private var lensFacing = CameraSelector.LENS_FACING_BACK
 
     // 카메라 권한 요청 런처.
     // 사용자가 한 번 "허용"을 누르면 안드로이드 시스템이 앱 재실행 시에도 계속 허용 상태를
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         binding.shutterButton.setOnClickListener { takePhoto() }
         binding.retakeButton.setOnClickListener { returnToCameraMode() }
         binding.printButton.setOnClickListener { printCapturedPhoto() }
+        binding.switchCameraButton.setOnClickListener { switchCamera() }
     }
 
     private fun hasCameraPermission(): Boolean =
@@ -92,7 +94,9 @@ class MainActivity : AppCompatActivity() {
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 .build()
 
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(lensFacing)
+                .build()
 
             try {
                 cameraProvider.unbindAll()
@@ -101,6 +105,16 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "카메라를 시작할 수 없습니다: ${exc.message}", Toast.LENGTH_LONG).show()
             }
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    // 전면 <-> 후면 카메라 전환
+    private fun switchCamera() {
+        lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+            CameraSelector.LENS_FACING_FRONT
+        } else {
+            CameraSelector.LENS_FACING_BACK
+        }
+        startCamera()
     }
 
     private fun takePhoto() {
