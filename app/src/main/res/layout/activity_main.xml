@@ -128,7 +128,7 @@
                 android:layout_height="52dp"
                 android:background="@drawable/bg_gold_button"
                 android:text="@string/print_btn"
-                android:textColor="@color/wood_dark"
+                android:textColor="@color/wood_white"
                 android:textStyle="bold"
                 android:textAllCaps="false"
                 android:paddingHorizontal="24dp" />
