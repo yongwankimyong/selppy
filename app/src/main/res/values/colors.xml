@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Wood tone palette -->
+    <color name="wood_dark">#3E2723</color>
+    <color name="wood_medium">#6D4C31</color>
+    <color name="wood_light">#8D6E4F</color>
+    <color name="wood_tan">#C8A97E</color>
+    <color name="wood_cream">#F3E5D0</color>
+    <color name="wood_gold">#C9A227</color>
+    <color name="wood_white">#FFFBF5</color>
+    <color name="shutter_red">#B85C38</color>
+    <color name="text_primary">#3E2723</color>
+    <color name="text_on_dark">#F3E5D0</color>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wood Print Cam</string>
+    <string name="permission_denied_msg">카메라 권한이 필요해요. 설정에서 허용해주세요.</string>
+    <string name="capture_btn">촬영</string>
+    <string name="retake_btn">다시 찍기</string>
+    <string name="print_btn">인쇄하기</string>
+    <string name="print_job_name">WoodPrintCam Photo</string>
+</resources>

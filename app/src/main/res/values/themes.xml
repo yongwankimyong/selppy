@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.WoodPrintCam" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/wood_medium</item>
+        <item name="colorPrimaryDark">@color/wood_dark</item>
+        <item name="colorAccent">@color/wood_gold</item>
+        <item name="android:windowBackground">@color/wood_cream</item>
+        <item name="android:statusBarColor">@color/wood_dark</item>
+    </style>
+</resources>
